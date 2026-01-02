@@ -1,0 +1,1 @@
+global UB_PYTHON_SCRIPT_PATH "/home/user/LEGOSim/ns-3-ub/scratch/ns-3-ub-tools/trace_analysis/parse_trace.py"

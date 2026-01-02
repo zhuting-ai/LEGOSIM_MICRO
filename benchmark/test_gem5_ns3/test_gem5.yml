@@ -1,0 +1,49 @@
+# Phase 1: 功能模拟阶段 (Simlets)
+phase1:
+  # Chiplet 0 (gem5 实例)
+  - cmd: "$SIMULATOR_ROOT/gem5/build/X86/gem5.opt"
+    # 参数说明:
+    # 1. se.py 路径 (注意新版在 deprecated 目录下)
+    # 2. --cmd 指向你编译出的静态二进制文件
+    # 3. --options 传递给 test_gem5 的参数 (idX idY)
+    args: [
+      "$SIMULATOR_ROOT/gem5/configs/deprecated/example/se.py",
+      "--cmd=$BENCHMARK_ROOT/test_gem5",
+      "--options=0 0"
+    ]
+    log: "gem5_0.log"
+    is_to_stdout: false
+    clock_rate: 1
+
+  # Chiplet 1 (另一个 gem5 实例)
+  - cmd: "$SIMULATOR_ROOT/gem5/build/X86/gem5.opt"
+    args: [
+      "$SIMULATOR_ROOT/gem5/configs/deprecated/example/se.py",
+      "--cmd=$BENCHMARK_ROOT/test_gem5",
+      "--options=1 0"
+    ]
+    log: "gem5_1.log"
+    is_to_stdout: false
+    clock_rate: 1
+
+# Phase 2: 互连网络模拟阶段 (NoI - Popnet)
+phase2:
+  - cmd: "/bin/bash"
+    # ns-3-ub 逻辑重点:
+    # 1. run: 执行 ns3 的运行命令
+    # 2. 'scratch/ub-quick-example $BENCHMARK_ROOT': 执行你的 C++ 示例脚本，并传入用例目录路径
+    # 3. --mtp-threads=8: 如果你编译时启用了多线程加速，可以加上这个参数
+    args:
+      - "-c"
+      - |
+        python3 $BENCHMARK_ROOT/convert_bench.py && \
+        cd $SIMULATOR_ROOT/ns-3-ub && \
+        ./ns3 run 'scratch/ub-quick-example $BENCHMARK_ROOT' -- --mtp-threads=8
+    log: "ns3_noi.log"
+    is_to_stdout: true
+    clock_rate: 1
+
+    
+
+bench_file: "./bench.txt"
+delayinfo_file: "./delayInfo.txt"
